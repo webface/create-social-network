@@ -1,9 +1,5 @@
-import gql from 'graphql-tag';
-import {
-  postCommentsPayload,
-  postAuthorPayload,
-  postLikesPayload,
-} from './post';
+import { gql } from '@apollo/client';
+import { postCommentsPayload, postAuthorPayload, postLikesPayload } from './post';
 
 /**
  * Records to select from user
@@ -24,9 +20,10 @@ const userPayload = `
  * Gets specific user by username
  */
 export const GET_USER = gql`
-  query($username: String!) {
-    getUser(username: $username) {
+  query($username: String, $id: ID) {
+    getUser(username: $username, id: $id) {
       ${userPayload}
+      isOnline
       posts {
         id
       }
@@ -110,6 +107,14 @@ export const GET_AUTH_USER = gql`
             image
           }
         }
+      }
+      newConversations {
+        id
+        username
+        fullName
+        image
+        lastMessage
+        lastMessageCreatedAt
       }
       likes {
         id
@@ -254,6 +259,37 @@ export const USER_SUGGESTIONS = gql`
       fullName
       username
       image
+    }
+  }
+`;
+
+/**
+ * Get users with whom authUser had a conversation
+ */
+export const GET_CONVERSATIONS = gql`
+  query($authUserId: ID!) {
+    getConversations(authUserId: $authUserId) {
+      id
+      username
+      fullName
+      image
+      isOnline
+      seen
+      lastMessage
+      lastMessageSender
+      lastMessageCreatedAt
+    }
+  }
+`;
+
+/**
+ * Checks if user is online in real time
+ */
+export const IS_USER_ONLINE_SUBSCRIPTION = gql`
+  subscription($authUserId: ID!, $userId: ID!) {
+    isUserOnline(authUserId: $authUserId, userId: $userId) {
+      userId
+      isOnline
     }
   }
 `;

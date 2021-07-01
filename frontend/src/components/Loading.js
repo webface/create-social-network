@@ -47,10 +47,34 @@ export const Loading = styled.div`
   transform: translateZ(0);
   animation: ${Load} 1.7s infinite ease, ${Round} 1.7s infinite ease;
   margin: 0 auto;
-  margin-top: ${p => p.top && p.theme.spacing[p.top]};
-  margin-bottom: ${p => p.bottom && p.theme.spacing[p.bottom]};
-  color: ${p =>
-    p.color ? p.theme.colors[p.color] : p.theme.colors.text.secondary};
-  font-size: ${p =>
-    p.size ? p.theme.font.size[p.size] : p.theme.font.size.sm};
+  margin-top: ${(p) => p.top && p.theme.spacing[p.top]};
+  margin-bottom: ${(p) => p.bottom && p.theme.spacing[p.bottom]};
+  color: ${(p) => (p.color ? p.theme.colors[p.color] : p.theme.colors.text.secondary)};
+  font-size: ${(p) => (p.size ? p.theme.font.size[p.size] : p.theme.font.size.sm)};
+`;
+
+/**
+ * Displays loading dots
+ */
+export const LoadingDots = styled.div`
+  &::after {
+    display: block;
+    animation: ellipsis 1s infinite;
+    content: '.';
+    text-align: center;
+    color: ${(p) => (p.color ? p.theme.colors[p.color] : p.theme.colors.text.secondary)};
+    font-size: ${(p) => p.theme.font.size.xl};
+  }
+
+  @keyframes ellipsis {
+    0% {
+      content: '.';
+    }
+    33% {
+      content: '..';
+    }
+    66% {
+      content: '...';
+    }
+  }
 `;

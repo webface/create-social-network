@@ -52,6 +52,7 @@ ${p => p.ghost && `
     border-radius: 0;
     background-color: transparent;
     padding: 0;
+    text-align: left;
   `};
 
   ${p => p.fullWidth && `
@@ -67,15 +68,13 @@ export const InputText = styled.input`
   height: 36px;
   width: 100%;
   transition: border 0.1s;
-  border-radius: ${p => p.theme.radius.sm};
-  padding-left: ${p => p.theme.spacing.xs};
-  border: 1px solid
-    ${p =>
-      p.borderColor ? p.theme.colors[p.borderColor] : p.theme.colors.grey[300]};
-  color: ${p => p.theme.colors.text.secondary};
+  border-radius: ${(p) => p.theme.radius.sm};
+  padding-left: ${(p) => p.theme.spacing.xs};
+  border: 1px solid ${(p) => (p.borderColor ? p.theme.colors[p.borderColor] : p.theme.colors.border.main)};
+  color: ${(p) => p.theme.colors.text.secondary};
 
   &:focus {
-    border-color: ${p => p.theme.colors.grey[400]};
+    border-color: ${(p) => p.theme.colors.border.main};
   }
 `;
 
@@ -88,13 +87,13 @@ export const Textarea = styled.textarea`
   width: 100%;
   resize: none;
   border: 0;
-  padding-left: ${p => p.theme.spacing.sm};
-  padding-top: ${p => p.theme.spacing.xs};
-  color: ${p => p.theme.colors.text.main};
-  font-size: ${p => p.theme.font.size.xs};
+  padding-left: ${(p) => p.theme.spacing.sm};
+  padding-top: ${(p) => p.theme.spacing.xs};
+  color: ${(p) => p.theme.colors.text.main};
+  font-size: ${(p) => p.theme.font.size.xs};
 
   &::placeholder {
-    color: ${p => p.theme.colors.text.secondary};
+    color: ${(p) => p.theme.colors.text.secondary};
   }
 `;
 
@@ -103,8 +102,8 @@ export const Textarea = styled.textarea`
  */
 export const Form = styled.form`
   display: block;
-  border-radius: ${p => p.theme.radius.sm};
-  padding: ${p => p.theme.spacing.lg} ${p => p.theme.spacing.sm};
-  background-color: ${p => p.theme.colors.white};
-  border: 1px solid ${p => p.theme.colors.grey[300]};
+  border-radius: ${(p) => p.theme.radius.sm};
+  padding: ${(p) => p.theme.spacing.lg} ${(p) => p.theme.spacing.sm};
+  background-color: ${(p) => p.theme.colors.white};
+  border: 1px solid ${(p) => p.theme.colors.border.main};
 `;

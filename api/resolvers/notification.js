@@ -1,3 +1,8 @@
+import { withFilter } from 'apollo-server';
+
+import { pubSub } from '../utils/apollo-server';
+import { NOTIFICATION_CREATED_OR_DELETED } from '../constants/Subscriptions';
+
 const Query = {
   /**
    * Gets notifications for specific user
@@ -6,11 +11,7 @@ const Query = {
    * @param {int} skip how many notifications to skip
    * @param {int} limit how many notifications to limit
    */
-  getUserNotifications: async (
-    root,
-    { userId, skip, limit },
-    { Notification }
-  ) => {
+  getUserNotifications: async (root, { userId, skip, limit }, { Notification }) => {
     const query = { user: userId };
     const count = await Notification.where(query).countDocuments();
     const notifications = await Notification.where(query)
@@ -39,12 +40,10 @@ const Mutation = {
    */
   createNotification: async (
     root,
-    {
-      input: { userId, authorId, postId, notificationType, notificationTypeId },
-    },
+    { input: { userId, authorId, postId, notificationType, notificationTypeId } },
     { Notification, User }
   ) => {
-    const newNotification = await new Notification({
+    let newNotification = await new Notification({
       author: authorId,
       user: userId,
       post: postId,
@@ -52,10 +51,21 @@ const Mutation = {
     }).save();
 
     // Push notification to user collection
-    await User.findOneAndUpdate(
-      { _id: userId },
-      { $push: { notifications: newNotification.id } }
-    );
+    await User.findOneAndUpdate({ _id: userId }, { $push: { notifications: newNotification.id } });
+
+    // Publish notification created event
+    newNotification = await newNotification
+      .populate('author')
+      .populate('follow')
+      .populate({ path: 'comment', populate: { path: 'post' } })
+      .populate({ path: 'like', populate: { path: 'post' } })
+      .execPopulate();
+    pubSub.publish(NOTIFICATION_CREATED_OR_DELETED, {
+      notificationCreatedOrDeleted: {
+        operation: 'CREATE',
+        notification: newNotification,
+      },
+    });
 
     return newNotification;
   },
@@ -64,18 +74,25 @@ const Mutation = {
    *
    * @param {string} id
    */
-  deleteNotification: async (
-    root,
-    { input: { id } },
-    { Notification, User }
-  ) => {
-    const notification = await Notification.findByIdAndRemove(id);
+  deleteNotification: async (root, { input: { id } }, { Notification, User }) => {
+    let notification = await Notification.findByIdAndRemove(id);
 
     // Delete notification from users collection
-    await User.findOneAndUpdate(
-      { _id: notification.user },
-      { $pull: { notifications: notification.id } }
-    );
+    await User.findOneAndUpdate({ _id: notification.user }, { $pull: { notifications: notification.id } });
+
+    // Publish notification deleted event
+    notification = await notification
+      .populate('author')
+      .populate('follow')
+      .populate({ path: 'comment', populate: { path: 'post' } })
+      .populate({ path: 'like', populate: { path: 'post' } })
+      .execPopulate();
+    pubSub.publish(NOTIFICATION_CREATED_OR_DELETED, {
+      notificationCreatedOrDeleted: {
+        operation: 'DELETE',
+        notification,
+      },
+    });
 
     return notification;
   },
@@ -84,17 +101,9 @@ const Mutation = {
    *
    * @param {string} userId
    */
-  updateNotificationSeen: async (
-    root,
-    { input: { userId } },
-    { Notification }
-  ) => {
+  updateNotificationSeen: async (root, { input: { userId } }, { Notification }) => {
     try {
-      await Notification.update(
-        { user: userId, seen: false },
-        { seen: true },
-        { multi: true }
-      );
+      await Notification.update({ user: userId, seen: false }, { seen: true }, { multi: true });
 
       return true;
     } catch (e) {
@@ -103,4 +112,20 @@ const Mutation = {
   },
 };
 
-export default { Query, Mutation };
+const Subscription = {
+  /**
+   * Subscribes to notification created or deleted event
+   */
+  notificationCreatedOrDeleted: {
+    subscribe: withFilter(
+      () => pubSub.asyncIterator(NOTIFICATION_CREATED_OR_DELETED),
+      (payload, variables, { authUser }) => {
+        const userId = payload.notificationCreatedOrDeleted.notification.user.toString();
+
+        return authUser && authUser.id === userId;
+      }
+    ),
+  },
+};
+
+export default { Query, Mutation, Subscription };

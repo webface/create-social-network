@@ -20,12 +20,12 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
-  z-index: ${p => p.theme.zIndex.lg};
+  z-index: ${(p) => p.theme.zIndex.lg};
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 
-  @media (min-width: ${p => p.theme.screen.md}) {
+  @media (min-width: ${(p) => p.theme.screen.md}) {
     justify-content: center;
   }
 `;
@@ -33,7 +33,7 @@ const Container = styled.div`
 const Pages = styled.div`
   margin-top: 80px;
 
-  @media (min-width: ${p => p.theme.screen.md}) {
+  @media (min-width: ${(p) => p.theme.screen.md}) {
     margin-top: -120px;
   }
 `;
@@ -41,36 +41,26 @@ const Pages = styled.div`
 /**
  * Main Layout for the app, when user isn't authenticated
  */
-const AuthLayout = ({ refetch }) => (
-  <Root>
-    <Overlay transparency="0.5" />
+const AuthLayout = ({ refetch }) => {
+  return (
+    <Root>
+      <Overlay transparency="0.5" />
 
-    <Container>
-      <AuthHeader refetch={refetch} />
+      <Container>
+        <AuthHeader refetch={refetch} />
 
-      <Pages>
-        <Switch>
-          <Route
-            exact
-            path={Routes.HOME}
-            render={() => <SignUp refetch={refetch} />}
-          />
-          <Route
-            exact
-            path={Routes.FORGOT_PASSWORD}
-            component={ForgotPassword}
-          />
-          <Route
-            exact
-            path={Routes.RESET_PASSWORD}
-            render={() => <ResetPassword refetch={refetch} />}
-          />
-          <Redirect to={Routes.HOME} />
-        </Switch>
-      </Pages>
-    </Container>
-  </Root>
-);
+        <Pages>
+          <Switch>
+            <Route exact path={Routes.HOME} render={() => <SignUp refetch={refetch} />} />
+            <Route exact path={Routes.FORGOT_PASSWORD} component={ForgotPassword} />
+            <Route exact path={Routes.RESET_PASSWORD} render={() => <ResetPassword refetch={refetch} />} />
+            <Redirect to={Routes.HOME} />
+          </Switch>
+        </Pages>
+      </Container>
+    </Root>
+  );
+};
 
 AuthLayout.propTypes = {
   refetch: PropTypes.func.isRequired,

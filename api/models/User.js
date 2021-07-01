@@ -36,6 +36,10 @@ const userSchema = new Schema(
     imagePublicId: String,
     coverImage: String,
     coverImagePublicId: String,
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
     posts: [
       {
         type: Schema.Types.ObjectId,
@@ -72,6 +76,12 @@ const userSchema = new Schema(
         ref: 'Notification',
       },
     ],
+    messages: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     timestamps: true,
@@ -81,7 +91,7 @@ const userSchema = new Schema(
 /**
  * Hashes the users password when saving it to DB
  */
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   if (!this.isModified('password')) {
     return next();
   }

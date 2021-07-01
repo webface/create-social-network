@@ -5,7 +5,7 @@ import { generatePath } from 'react-router-dom';
 
 import { Spacing } from 'components/Layout';
 import { A } from 'components/Text';
-import { UserIcon } from 'components/icons';
+import Avatar from 'components/Avatar';
 
 import * as Routes from 'routes';
 
@@ -16,16 +16,16 @@ const Root = styled.div`
   overflow: auto;
   position: absolute;
   top: 50px;
-  font-size: ${p => p.theme.font.size.xs};
-  box-shadow: ${p => p.theme.shadows.xl};
-  background-color: ${p => p.theme.colors.white};
+  font-size: ${(p) => p.theme.font.size.xs};
+  box-shadow: ${(p) => p.theme.shadows.sm};
+  background-color: ${(p) => p.theme.colors.white};
 `;
 
 const StyledA = styled(A)`
   display: block;
 
   &:hover {
-    background-color: ${p => p.theme.colors.grey[100]};
+    background-color: ${(p) => p.theme.colors.grey[100]};
   }
 `;
 
@@ -34,42 +34,27 @@ const Item = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: ${p => p.theme.spacing.xs};
-`;
-
-const ImageContainer = styled.div`
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-`;
-
-const Image = styled.img`
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
+  padding: ${(p) => p.theme.spacing.xs};
 `;
 
 const Name = styled.div`
-  font-weight: ${p => p.theme.font.weight.bold};
+  font-weight: ${(p) => p.theme.font.weight.bold};
 `;
 
 const UserName = styled.div`
-  font-size: ${p => p.theme.font.size.xxs};
+  font-size: ${(p) => p.theme.font.size.xxs};
 `;
 
 const NoSearchResult = styled.div`
   text-align: center;
-  padding: ${p => p.theme.spacing.xs};
-  color: ${p => p.theme.colors.text.main};
+  padding: ${(p) => p.theme.spacing.xs};
+  color: ${(p) => p.theme.colors.text.main};
 `;
 
 /**
  * Displays search result, meant to be used in Search component
  */
-const SearchResult = ({ users }) => {
+const SearchResult = ({ users, forMessage }) => {
   if (users.length < 1) {
     return (
       <Root>
@@ -80,19 +65,17 @@ const SearchResult = ({ users }) => {
 
   return (
     <Root>
-      {users.map(user => (
+      {users.map((user) => (
         <StyledA
           key={user.id}
-          to={generatePath(Routes.USER_PROFILE, { username: user.username })}
+          to={
+            forMessage
+              ? generatePath(Routes.MESSAGES, { userId: user.id })
+              : generatePath(Routes.USER_PROFILE, { username: user.username })
+          }
         >
           <Item>
-            <ImageContainer>
-              {user.image ? (
-                <Image src={user.image} />
-              ) : (
-                <UserIcon width="34" />
-              )}
-            </ImageContainer>
+            <Avatar image={user.image} size={34} />
 
             <Spacing left="xs">
               <Name>{user.fullName}</Name>
@@ -107,6 +90,7 @@ const SearchResult = ({ users }) => {
 
 SearchResult.propTypes = {
   users: PropTypes.array.isRequired,
+  forMessage: PropTypes.bool,
 };
 
 export default SearchResult;
